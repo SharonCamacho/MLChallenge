@@ -88,3 +88,52 @@ cd tests && python -m pytest api/test_api.py -v
 ```
 
 Result: 4/4 tests passed.
+
+## Part III: Cloud Deployment
+
+### Cloud Provider
+
+The API was deployed on **Google Cloud Run** in the `us-central1` region.
+
+- **URL:** `https://flight-delay-prediction-739046741257.us-central1.run.app`
+- **Endpoint:** `POST /predict`
+
+### Cloud Run Configuration
+
+| Parameter | Value |
+|---|---|
+| CPU | 1 vCPU |
+| Memory | 2 GiB |
+| Min instances (`minScale`) | 1 |
+| Max instances (`maxScale`) | 5 |
+| Container concurrency | 80 |
+| Request timeout | 300s |
+| Startup CPU boost | Enabled |
+
+Setting `minScale: 1` ensures one instance is always warm, eliminating cold start latency. `maxScale: 5` allows the service to scale up under load while keeping costs controlled.
+
+### Tests
+
+The API was validated at multiple levels before and after deployment:
+
+- **Unit/integration tests** (`make api-test`): 4/4 passed — validates correct predictions, input validation (invalid OPERA, TIPOVUELO, MES), and HTTP status codes (200/400).
+- **Model tests** (`make model-test`): 4/4 passed — validates preprocessing, training, and prediction pipeline.
+- **Stress test** (`make stress-test`): Passed — validates performance under load against the deployed service.
+
+### Stress Test Results
+
+The stress test was executed with `make stress-test` (Locust, 100 concurrent users, 60 seconds):
+
+| Metric | Result |
+|---|---|
+| Total requests | 11,492 |
+| Failed requests | 0 (0.00%) |
+| Average response time | 157 ms |
+| Median response time | 130 ms |
+| P95 response time | 270 ms |
+| P99 response time | 320 ms |
+| Max response time | 1,144 ms |
+| Throughput | ~192 req/s |
+
+All requests returned successfully with 0% failure rate. The test passed with exit code 0.
+

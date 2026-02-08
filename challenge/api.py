@@ -34,7 +34,7 @@ class FlightData(BaseModel):
             raise ValueError(f"Invalid airline: {v}")
         return v
 
-    @field_validator("u")
+    @field_validator("TIPOVUELO")
     @classmethod
     def validate_tipovuelo(cls, v):
         if v not in ("I", "N"):

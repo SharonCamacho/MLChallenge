@@ -38,19 +38,6 @@ nosetests.xml
 coverage.xml
 *.log
 
-# Model artifacts (generated during training)
-# Keep exploration.ipynb but ignore trained models
-*.pkl
-*.joblib
-*.h5
-*.hdf5
-*.ckpt
-*.pth
-*.pt
-*.onnx
-challenge/model_*.pkl
-challenge/model_*.joblib
-
 # Environment variables
 .env
 .env.local

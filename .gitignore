@@ -71,3 +71,6 @@ pip-log.txt
 
 # Locust (stress testing)
 *.locust
+
+# Test reports
+reports/

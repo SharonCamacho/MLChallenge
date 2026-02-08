@@ -41,3 +41,50 @@ cd tests && python -m pytest model/test_model.py -v
 ```
 
 Result: 4/4 tests passed.
+
+## Part II: API Implementation
+
+### Endpoint
+
+- **POST `/predict`**: Receives a list of flights and returns delay predictions.
+
+Request body:
+```json
+{
+  "flights": [
+    {"OPERA": "Aerolineas Argentinas", "TIPOVUELO": "N", "MES": 3}
+  ]
+}
+```
+
+Response:
+```json
+{"predict": [0]}
+```
+
+### Input Validation
+
+Pydantic models (`FlightData`) validate each flight before processing:
+- **OPERA**: Must be a valid airline from the dataset (loaded dynamically from `data.csv`).
+- **TIPOVUELO**: Must be "I" (international) or "N" (national).
+- **MES**: Must be between 1 and 12.
+
+Invalid inputs return HTTP 400. FastAPI's default 422 validation error is overridden with a custom exception handler to return 400 as expected by the tests.
+
+### Flow
+
+1. Validate input with Pydantic
+2. Convert flights to DataFrame
+3. Preprocess with `DelayModel.preprocess()`
+4. Predict with `DelayModel.predict()`
+5. Return predictions
+
+### Tests
+
+Run from the `tests/` folder:
+
+```bash
+cd tests && python -m pytest api/test_api.py -v
+```
+
+Result: 4/4 tests passed.

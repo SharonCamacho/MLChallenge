@@ -137,3 +137,56 @@ The stress test was executed with `make stress-test` (Locust, 100 concurrent use
 
 All requests returned successfully with 0% failure rate. The test passed with exit code 0.
 
+
+## Part IV: CI/CD Implementation
+
+
+### Overview
+
+
+CI/CD pipelines were implemented using GitHub Actions in `.github/workflows/`.
+
+
+### Continuous Integration (`ci.yml`)
+
+
+**Triggers:** Push to `main` or `develop`, and pull requests to `main`.
+
+
+**Steps:**
+1. Checkout code
+2. Set up Python 3.11
+3. Install all dependencies (`make install`)
+4. Run model tests (`make model-test`)
+5. Run API tests (`make api-test`)
+
+
+This ensures that every change is validated against the full test suite before merging.
+
+
+### Continuous Delivery (`cd.yml`)
+
+
+**Triggers:** Push to `main` only (after CI passes).
+
+
+**Steps:**
+1. Checkout code
+2. Authenticate to Google Cloud using Workload Identity Federation (keyless, OIDC-based)
+3. Set up Cloud SDK
+4. Configure Docker for Artifact Registry
+5. Build and tag Docker image (using commit SHA and `latest` tags)
+6. Push image to GCP Artifact Registry
+7. Deploy to Cloud Run with public access
+
+Authentication uses **Workload Identity Federation** instead of static JSON keys. This is more secure as it eliminates the need to manage and rotate service account keys. GitHub Actions obtains a short-lived OIDC token that is exchanged for GCP credentials, restricted to this specific repository.
+
+### Required GitHub Configuration
+
+**Variables:**
+- `GCP_PROJECT_ID`: GCP project ID
+- `GCP_REGION`: GCP region (e.g., `us-central1`)
+- `GCP_REPOSITORY`: Artifact Registry repository name
+- `GCP_SERVICE`: Cloud Run service name
+
+
